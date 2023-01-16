@@ -71,7 +71,7 @@ def cw5():
     clf = SimplePerceptron(learningRate=1.0, m=100)
     X, y = data_cw5(1000)
     c = clf.centers()
-    z = clf.distance(X, c, sig=0.2)
+    z = clf.distance(X, c)
     clf.fit(z, y, maxIteration=2000)
 
     print(clf.score(z, y))
