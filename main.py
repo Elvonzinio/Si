@@ -78,10 +78,11 @@ def cw5():
 
     labels, XX, YY = clf.contour(c, 100)
     plt.contourf(XX, YY, np.reshape(labels, (100, 100)))
-    plt.scatter(X[:, 0], X[:, 1], c=y, s=3, cmap="coolwarm")
+    plt.scatter(X[:, 0], X[:, 1], c=y, s=3, cmap="bwr")
     plt.scatter(c[:, 0], c[:, 1], c="black", s=10)
     plt.show()
 
 
 if __name__ == '__main__':
     cw4()
+    cw5()

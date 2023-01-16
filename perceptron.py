@@ -57,14 +57,13 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
         X = np.c_[np.ones(m), X]
         return self.weights.dot(X.T)  # zwraca sume iloczynow
 
-    def distance(self, x, c, sig=1):
+    def distance(self, x, c, n=2, sig=0.2):
         z = np.zeros((len(x), self.m))
-        for i, elem_x in enumerate(x):
+        for i in range(len(x)):
             for j in range(self.m):
-                for element, value_c in zip(elem_x, c[j]):
-                    z[i, j] += (element - value_c) ** 2
+                for k in range(n):
+                    z[i, j] += (x[i, k] - c[j, k]) ** 2
                 z[i, j] = np.exp(-z[i, j] / (2 * sig ** 2))
-
         return z
 
     def centers(self):
