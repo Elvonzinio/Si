@@ -10,14 +10,14 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
         self.learningRate = learningRate
         self.m = m
 
-    def fit(self, X, y, maxIteration=500):
+    def fit(self, X, y, maxIterations=500):
         self.classLabels = np.unique(y)
         samplesNumber, featuresNumber = X.shape
 
         X = np.c_[np.ones(samplesNumber), X]
         self.weights = np.zeros(featuresNumber + 1)  # czemu tu +1
-        iteration = 0
-        while iteration < maxIteration:
+        iterations = 0
+        while iterations < maxIterations:
             errorIndexes = []  # lista indeksow ktore nie sa prawidlowo predictowane
             for errorIndex, x in enumerate(X):
                 prediction = self.weights.dot(x)
@@ -34,12 +34,14 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
                 break
             errorIndex = errorIndexes[np.random.randint(len(errorIndexes))]
             self.weights = self.weights + self.learningRate * y[errorIndex] * X[errorIndex]
-            iteration += 1
+            iterations += 1
+
+        return self.weights, iterations
 
     def predict(self, X):
         prediction = self.decisionFunction(X)
 
-        predictions = np.zeros(len(X))
+        predictions = np.zeros(len(X), dtype="int8")
         for index, element in enumerate(prediction):  # Przypisanie etykiet do wyniku predykcji
             if element > 0.0:
                 predictions[index] = 1
@@ -63,7 +65,7 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
     def centroids(self):
         X = np.random.uniform(-1, 1, self.m)
         Y = np.random.uniform(-1, 1, self.m)
-        centroidMatrix = np.c_[X, Y] # konkatonacja tablic (link do exampla)
+        centroidMatrix = np.c_[X, Y]  # konkatonacja tablic (link do exampla)
         return centroidMatrix
 
     def contour(self, centroids, size=100):

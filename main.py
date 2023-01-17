@@ -4,82 +4,91 @@ from sklearn.datasets import make_blobs
 from perceptron import SimplePerceptron
 
 
-def data_cw4(size):
-    X, y = make_blobs(n_samples=size, centers=2, n_features=2, cluster_std=0.5, random_state=0)
+def generateData4(size):
+    X, y = make_blobs(
+        n_samples=size,
+        centers=2,
+        n_features=2,
+        cluster_std=0.5,
+        random_state=0
+    )
 
     theta = 1
-    rotate_matrix = [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
-    X = np.matmul(X, rotate_matrix)
+    rotateMatrix = [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
+    X = np.matmul(X, rotateMatrix)  # mnożenie macierzy
 
     for i, element in enumerate(y):
         if element == 0:
             y[i] = -1
-    y = y.reshape((size, 1))
 
-    return X, y.reshape(1000)
+    return X, y
 
 
-def data_cw5(I):
+def generateData5(size):
     np.random.seed(0)
-    X = np.random.uniform(0, 2 * np.pi, I)
-    Y = np.random.uniform(-1, 1, I)
-    x = np.c_[X, Y]
-    y = np.ones(I)
+    coordinateX = np.random.uniform(0, 2 * np.pi, size)  # uniform -> rozkład normalny
+    coordinateY = np.random.uniform(-1, 1, size)
 
-    for i in range(I):
-        if np.abs(np.sin(x[i, 0])) > np.abs(x[i, 1]):
+    X = np.c_[coordinateX, coordinateY]
+    y = np.ones(size)
+
+    for i, sample in enumerate(X):
+        if np.abs(np.sin(sample[0])) > np.abs(sample[1]):  # link do wzoru
             y[i] = -1
 
-    for i in range(I):
-        x[i, 0] = (x[i, 0] / np.pi) - 1
+    for i in range(size):
+        X[i, 0] = (X[i, 0] / np.pi) - 1
 
-    return x, y
+    return X, y
 
 
 def cw4():
-    X, y = data_cw4(1000)
+    print("Zadanie1")
+    X, y = generateData4(1000)
     clf = SimplePerceptron(learningRate=1.0)
-    clf.fit(X, y)
-    print(clf.weights)
+    weights, iteration = clf.fit(X, y)
+    print(f"Weights: {weights}")
+    print(f"Iterations: {iteration}")
 
     triangles = []
     circles = []
 
-    for element, label in zip(X, y):
+    for sample, label in zip(X, y):
         if label == 1:
-            triangles.append(element)
+            triangles.append(sample)
         else:
-            circles.append(element)
+            circles.append(sample)
 
     triangles = np.array(triangles)
     circles = np.array(circles)
 
-    plt.scatter(triangles[:, 0], triangles[:, 1], c='red', s=6, marker="^")
-    plt.scatter(circles[:, 0], circles[:, 1], c='blue', s=6, marker="o")
+    plt.scatter(triangles[:, 0], triangles[:, 1], c='red', s=10, marker="^")
+    plt.scatter(circles[:, 0], circles[:, 1], c='blue', s=10, marker="o")
 
-    min_value = min(X[:, 0])
-    max_value = max(X[:, 0])
+    minValue = min(X[:, 0])
+    maxValue = max(X[:, 0])
 
-    x1 = np.array([min_value, max_value])
-    w = clf.weights
-    x2 = (-(w[0] + w[1] * x1) / w[2])
+    x1 = np.array([minValue, maxValue])
+    x2 = (-(weights[0] + weights[1] * x1) / weights[2])
     plt.plot(x1, x2)
     plt.show()
 
 
 def cw5():
+    print("\n\nZadanie2")
+    X, y = generateData5(1000)
     clf = SimplePerceptron(learningRate=1.0, m=100)
-    X, y = data_cw5(1000)
-    c = clf.centroids()
-    z = clf.distance(X, c)
-    clf.fit(z, y, maxIteration=2000)
+    centroids = clf.centroids()
+    distances = clf.distance(X, centroids)
+    weights, iterations = clf.fit(distances, y, maxIterations=4000)
 
-    print(clf.score(z, y))
+    print(f"Iterations: {iterations}")
+    print(clf.score(distances, y))
 
-    labels, XX, YY = clf.contour(c, 100)
+    labels, XX, YY = clf.contour(centroids, 100)
     plt.contourf(XX, YY, np.reshape(labels, (100, 100)))
     plt.scatter(X[:, 0], X[:, 1], c=y, s=3, cmap="bwr")
-    plt.scatter(c[:, 0], c[:, 1], c="black", s=10)
+    plt.scatter(centroids[:, 0], centroids[:, 1], c="black", s=10)
     plt.show()
 
 
