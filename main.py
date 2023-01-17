@@ -70,7 +70,7 @@ def cw4():
 def cw5():
     clf = SimplePerceptron(learningRate=1.0, m=100)
     X, y = data_cw5(1000)
-    c = clf.centers()
+    c = clf.centroids()
     z = clf.distance(X, c)
     clf.fit(z, y, maxIteration=2000)
 

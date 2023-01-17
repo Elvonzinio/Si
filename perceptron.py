@@ -14,65 +14,59 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
         self.classLabels = np.unique(y)
         samplesNumber, featuresNumber = X.shape
 
-        yy = np.ones(samplesNumber, dtype="int8")
-        yy[y == self.classLabels[0]] = -1
-
         X = np.c_[np.ones(samplesNumber), X]
-        self.weights = np.zeros(featuresNumber + 1)
+        self.weights = np.zeros(featuresNumber + 1) # czemu tu +1
         iteration = 0
         while iteration < maxIteration:
-            error_indexes = []
-            for i, x in enumerate(X):
-                s = self.weights.dot(x)
+            errorIndexes = []
+            for errorIndex, x in enumerate(X):
+                prediction = self.weights.dot(x)
 
-                if s > 0.0:
-                    f = 1
+                if prediction > 0.0:
+                    predResult = 1
                 else:
-                    f = -1
+                    predResult = -1
 
-                if f != yy[i]:
-                    error_indexes.append(i)
+                if predResult != y[errorIndex]:
+                    errorIndexes.append(errorIndex)
                     break
-            if len(error_indexes) == 0:
+            if len(errorIndexes) == 0:
                 break
-            i = error_indexes[np.random.randint(len(error_indexes))]
-            self.weights = self.weights + self.learningRate * yy[i] * X[i]
+            errorIndex = errorIndexes[np.random.randint(len(errorIndexes))]
+            self.weights = self.weights + self.learningRate * y[errorIndex] * X[errorIndex]
             iteration += 1
 
     def predict(self, X):
-        s = self.decision_function(X)
+        prediction = self.decision_function(X)
 
-        predictions = []
-        for element in s:
+        predictions = np.zeros(len(X))
+        for index, element in enumerate(prediction):
             if element > 0.0:
-                predictions.append(1)
-            else:
-                predictions.append(0)
-        predictions = np.array(predictions)
+                predictions[index] = 1
 
         return self.classLabels[predictions]
 
     def decision_function(self, X):
-        m = X.shape[0]
-        X = np.c_[np.ones(m), X]
+        samplesNumber = X.shape[0]
+        X = np.c_[np.ones(samplesNumber), X] #laczenie tablic
         return self.weights.dot(X.T)  # zwraca sume iloczynow
 
-    def distance(self, x, c, sig=0.2):
-        z = np.zeros((len(x), self.m))
-        for i, elem_x in enumerate(x):
+    def distance(self, matrix, centroidsMatrix, sig=0.2):
+        distances = np.zeros((len(matrix), self.m))
+        for i, sample in enumerate(matrix):
             for j in range(self.m):
-                for element, value_c in zip(elem_x, c[j]):
-                    z[i, j] += (element - value_c) ** 2
-                z[i, j] = np.exp(-z[i, j] / (2 * sig ** 2))
-        return z
+                for z, c in zip(sample, centroidsMatrix[j]):
+                    distances[i, j] += (z - c) ** 2
+                distances[i, j] = np.exp(-distances[i, j] / (2 * sig ** 2))
+        return distances
 
-    def centers(self):
+    def centroids(self):
         X = np.random.uniform(-1, 1, self.m)
         Y = np.random.uniform(-1, 1, self.m)
-        c = np.c_[X, Y]
-        return c
+        centroidMatrix = np.c_[X, Y]
+        return centroidMatrix
 
-    def contour(self, c, size=100):
+    def contour(self, centroids, size=100):
         XY = np.linspace(-1, 1, size)
         XX, YY = np.meshgrid(XY, XY)
 
@@ -81,7 +75,7 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
 
         XY = np.c_[XXres, YYres]
 
-        z = self.distance(XY, c)
-        labels = self.predict(z)
+        distances = self.distance(XY, centroids)
+        labels = self.predict(distances)
 
         return labels, XX, YY
