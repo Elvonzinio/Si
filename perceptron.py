@@ -15,10 +15,10 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
         samplesNumber, featuresNumber = X.shape
 
         X = np.c_[np.ones(samplesNumber), X]
-        self.weights = np.zeros(featuresNumber + 1) # czemu tu +1
+        self.weights = np.zeros(featuresNumber + 1)  # czemu tu +1
         iteration = 0
         while iteration < maxIteration:
-            errorIndexes = []
+            errorIndexes = []  # lista indeksow ktore nie sa prawidlowo predictowane
             for errorIndex, x in enumerate(X):
                 prediction = self.weights.dot(x)
 
@@ -27,7 +27,7 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
                 else:
                     predResult = -1
 
-                if predResult != y[errorIndex]:
+                if predResult != y[errorIndex]:  # czy predykcja jest prawidlowa
                     errorIndexes.append(errorIndex)
                     break
             if len(errorIndexes) == 0:
@@ -37,33 +37,33 @@ class SimplePerceptron(BaseEstimator, ClassifierMixin):
             iteration += 1
 
     def predict(self, X):
-        prediction = self.decision_function(X)
+        prediction = self.decisionFunction(X)
 
         predictions = np.zeros(len(X))
-        for index, element in enumerate(prediction):
+        for index, element in enumerate(prediction):  # Przypisanie etykiet do wyniku predykcji
             if element > 0.0:
                 predictions[index] = 1
 
         return self.classLabels[predictions]
 
-    def decision_function(self, X):
+    def decisionFunction(self, X):
         samplesNumber = X.shape[0]
-        X = np.c_[np.ones(samplesNumber), X] #laczenie tablic
+        X = np.c_[np.ones(samplesNumber), X]  # laczenie tablic
         return self.weights.dot(X.T)  # zwraca sume iloczynow
 
     def distance(self, matrix, centroidsMatrix, sig=0.2):
         distances = np.zeros((len(matrix), self.m))
         for i, sample in enumerate(matrix):
-            for j in range(self.m):
+            for j in range(self.m):  # czym jest self.m ?
                 for z, c in zip(sample, centroidsMatrix[j]):
                     distances[i, j] += (z - c) ** 2
-                distances[i, j] = np.exp(-distances[i, j] / (2 * sig ** 2))
+                distances[i, j] = np.exp(-distances[i, j] / (2 * sig ** 2))  # link do wzoru
         return distances
 
     def centroids(self):
         X = np.random.uniform(-1, 1, self.m)
         Y = np.random.uniform(-1, 1, self.m)
-        centroidMatrix = np.c_[X, Y]
+        centroidMatrix = np.c_[X, Y] # konkatonacja tablic (link do exampla)
         return centroidMatrix
 
     def contour(self, centroids, size=100):
